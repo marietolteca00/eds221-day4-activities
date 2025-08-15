@@ -10,10 +10,14 @@ format: html
 weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 transects <- c("Transect A", "Transect B", "Transect C")
 
+study_matrix <- matrix(ncol = length(transects),
+                       nrow = length(weekdays))
+
 for (i in seq_along(weekdays)){
   for (j in seq_along(transects)){
-    print(paste0(weekdays[i], "-", transects[j]))
-  }
+    study <- paste0(weekdays[i], "-", transects[j])
+study_matrix[i, j] <- study
+  } 
 }
 ```
 
@@ -36,36 +40,32 @@ Newton <- function(mass, acceleration){ # use 'Newton' as function variable
 ```{r}
 Newton(mass=20, acceleration=50)
 ```
+
 ## Task 3
 - The length:weight relationship for fish is: W=aL^b where where L is total fish length (centimeters), W is the expected fish weight (grams), and a and b are species-dependent parameter values (shown below for several fish from Peyton et al. 2016).
 - Recreate the table above as a data frame stored as fish_parms. Then, write a function called fish_weight that allows a user to only enter the common name (argument fish_name) and total length (argument tot_length) (in centimeters) of a fish, to return the expected fish weight in grams. Test it out for different species and lengths.
 
+```{r}
+library(dplyr) # Need to load this in, in order for %>% to work
+
+fish_weight <- function(species, tot_length) { #species is just a placeholder, to not use fish_names and confuse R
+  fish_sub <- fish_parms %>% # Storing values into "fish_sub" that will filter fish_names
+    filter(fish_parms[["fish_name"]] == fish_name)
+  wt <- fish_sub$a_est * (tot_length ^ fish_sub$b_est) # Creating wt and using equation
+  return(wt) # storing values
+}
+
+fish_weight(species = "Milkfish", tot_length = 57) #finding out if code worked
+
+```
 Now, try creating a vector of lengths (e.g. 0 to 100, by increments of 1) and ensuring that your function will calculate the fish weight over a range of lengths for the given species (try this for milkfish, storing the output weights as milkfish_weights.
 ```{r}
-fish_name <- c("Milkfish", "Great barracuda", "Giant trevally")
+# Creating the vector of lengths
+length_vector <- seq(from = 0, to = 100, by= 1)
 
-a_est <- c(0.0905, 0.00181, 0.0353)
+# Using length vector for tot_length in the function
 
-b_est <- c(2.52, 3.27, 3.05)
-fish_parms <- data.frame(fish_name, a_est, b_est)
-
-fish_length <- seq(from= 0, to= 100, by= 1)
-```
-
-# creating fish_weight function
-```{r}
-fish_weight<- function(a, l, b){
-  weight<- a * l * exp(b)
-  for (i in seq_along(a_est[i])){
-    for (j in seq_along(b_est[j])){
-  }
-  }
-}
-```
-
-# creating loop for fish parms
-```{r}
-
+milkfish_weights <- fish_weight(species= "Milkfish", tot_length = length_vector)
 ```
 
 
@@ -76,16 +76,39 @@ P deep = 0.5H^2T
 
 Write a function called wave_power that calculates potential ocean wave power given inputs of wave height and period.
 
-Use your wave_power function to approximate wave power for a period of 8 seconds, over a range of wave heights from 0 to 3 meters by increments of 0.2 meters.
 ```{r}
-wave_power <- function(H, T){
-  eq <- 0.5 * H * exp(2) * T
+# Creating wave_power function and using the equation within the function!
+wave_power <- function(wave_height,wave_period){
+  0.5 * (wave_height ^ 2) * wave_period
 }
 ```
 
+- Use your wave_power function to approximate wave power for a period of 8 seconds, over a range of wave heights from 0 to 3 meters by increments of 0.2 meters.
 
 ```{r}
-wave_height <- seq(from = 0, to = 3, by= 8)
-```
+# create sequence over the range of wave_heigts
+wave_height <- seq(from=0, to=3, by= 0.2)
 
+# Using the wave_function
+# Assign wave_height to itself so it includes the sequence and goes over 8 seconds
+wave_power(wave_height = wave_height, wave_period = 8)
+```
+## Task 5 
+The wave energy equation changes based on ocean depth. Along the coast of Brenville, which has a very sharp shelf as the wave approaches the coast, wave energy is approximated using the deep ocean equation (the one you used above) for depths > 12 meters, and a shallow equation for depths <= 12 meters. The Brenville team estimates shallow wave power by:
+
+Create a function that requires inputs of water depth, wave height and period, then returns the approximated wave power using the correct equation for the depth entered. It should also include a message (hint: use message() just like you would use warning!) that lets the user know if the shallow or deep water equation was used.
+```{r}
+brenville_waves <- function(wave_height, wave_period, depth){
+  if(depth > 12){
+    message("Using the deep wave equation.")
+    bren_wave_energy <- 0.5 * (wave_height ^ 2) * wave_period
+  } else if (depth <= 12){
+    message("Using the shallow wave equation.")
+  }
+  return(bren_wave_energy)
+}
+
+brenville_waves(wave_height = 5, wave_period = 10, depth = 4)
+
+```
 
